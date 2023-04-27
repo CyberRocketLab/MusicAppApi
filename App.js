@@ -1,4 +1,3 @@
-
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView} from 'react-native';
 import {useState} from "react";
@@ -62,7 +61,11 @@ export default function App() {
 
     const renderAlbums = () => {
         return albums.map((album, index) => (
-            <Text key={index} style={styles.albumText}>{album.title}</Text>
+            <View key={index} style={styles.albumContainer}>
+                <Text style={styles.albumTitle}>{album.title}</Text>
+                <Text style={styles.albumYear}>Year: {album.date ? album.date.slice(0,4) : 'unknown'}</Text>
+                <Text style={styles.albumType}>Type: {album['primary-type']}</Text>
+            </View>
         ));
     };
 
@@ -141,7 +144,7 @@ const styles = StyleSheet.create({
     searchContainer: {
         flexDirection: 'column',
         alignItems: 'center',
-        margin: 150,
+        marginTop: 150,
     },
     albumsContainer: {
         flexGrow: 1,
@@ -150,6 +153,26 @@ const styles = StyleSheet.create({
     albumText: {
         fontSize: 16,
         marginBottom: 10,
+    },
+    albumContainer: {
+        width: 300,
+        margin: 10,
+        padding: 10,
+        borderWidth: 1,
+        borderColor: 'gray',
+        borderRadius: 5,
+    },
+    albumTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginBottom: 5,
+    },
+    albumYear: {
+        fontSize: 16,
+        marginBottom: 5,
+    },
+    albumType: {
+        fontSize: 16,
     },
 
 });
