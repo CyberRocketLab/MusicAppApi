@@ -1,52 +1,35 @@
-import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { useState } from "react";
+import React, { useState } from 'react';
+import { StyleSheet, Text, TextInput, TouchableOpacity, View, FlatList } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
 export default function SearchScreen() {
     const navigation = useNavigation();
     const [searchQuery, setSearchQuery] = useState('');
+    const [favoriteArtists, setFavoriteArtists] = useState([]);
 
     const handleSubmit = async () => {
         try {
             const query = encodeURIComponent(searchQuery);
-
             const response = await fetch(`https://musicbrainz.org/ws/2/artist/?query=${query}&fmt=json&limit=1`, {
-                headers: {
-                    'User-Agent': 'MyApp/1.0.0 (alexandr@gmail.com)',
-                },
+                headers: { 'User-Agent': 'MyApp/1.0.0 (alexandr@gmail.com)' },
             });
 
-            if (!response.ok) {
-                console.log('Error');
-                return;
-            }
+            if (!response.ok) throw new Error('Error');
 
             const data = await response.json();
-            const artist = data.artists[0];
+            const artistId = data.artists[0]?.id;
 
-            if (artist) {
-                const artistId = artist.id;
+            if (artistId) {
+                const releaseResponse = await fetch(`https://musicbrainz.org/ws/2/release?artist=${artistId}&fmt=json&limit=100`, {
+                    headers: { 'User-Agent': 'MyApp/1.0.0 (alexandr@gmail.com)' },
+                });
 
-                setTimeout(async () => {
-                    const releaseResponse = await fetch(
-                        `https://musicbrainz.org/ws/2/release?artist=${artistId}&fmt=json&limit=100`,
-                        {
-                            headers: {
-                                'User-Agent': 'MyApp/1.0.0 (alexandr@gmail.com)',
-                            },
-                        }
-                    );
+                if (!releaseResponse.ok) throw new Error('Error fetching releases');
 
-                    if (!releaseResponse.ok) {
-                        console.log('Error fetching releases');
-                        return;
-                    }
+                const releaseData = await releaseResponse.json();
+                const releases = releaseData.releases || [];
 
-                    const releaseData = await releaseResponse.json();
-                    const releases = releaseData.releases;
-
-                    navigation.navigate('Results', { albums: releases || [] });
-                }, 1000); // 1-second delay
+                navigation.navigate('Results', { albums: releases });
             } else {
                 console.log('No artist found');
             }
@@ -55,59 +38,147 @@ export default function SearchScreen() {
         }
     };
 
+    const handleSaveFavorite = () => {
+        if (!favoriteArtists.includes(searchQuery)) {
+            const query = encodeURIComponent(searchQuery);
+            fetch(`https://musicbrainz.org/ws/2/artist/?query=${query}&fmt=json&limit=1`, {
+                headers: { 'User-Agent': 'MyApp/1.0.0 (alexandr@gmail.com)' },
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Error');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.artists && data.artists.length > 0) {
+                        setFavoriteArtists([...favoriteArtists, searchQuery]);
+                    } else {
+                        console.log('Artist not found');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error in handleSaveFavorite:', error);
+                });
+        }
+    };
+
+    const handleFavoritePress = (artist) => {
+        setSearchQuery(artist);
+        handleSubmit();
+    };
+
+    const renderItem = ({ item }) => (
+        <TouchableOpacity
+            onPress={() => handleFavoritePress(item)}
+            style={styles.favoriteArtistItem}
+        >
+            <Text style={styles.favoriteArtistText}>{item}</Text>
+        </TouchableOpacity>
+    );
+
     return (
-        <View style={styles.searchContainer}>
-            <Text style={styles.boldText}>
-                <Text>Alexandr Curanov{'\n'}</Text>
-                <Text>12029720</Text>
-            </Text>
+        <View style={styles.container}>
+            <Text style={styles.heading}>Alexandr Curanov{'\n'}12029720</Text>
             <TextInput
                 style={styles.input}
-                placeholder="Type here to search"
+                placeholder="Search for an artist"
                 value={searchQuery}
                 onChangeText={setSearchQuery}
             />
-            <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-                <Text style={styles.buttonText}>Submit</Text>
+            <TouchableOpacity
+                style={styles.button}
+                onPress={handleSubmit}
+            >
+                <Text style={styles.buttonText}>Search</Text>
             </TouchableOpacity>
+            <TouchableOpacity
+                style={styles.button}
+                onPress={handleSaveFavorite}
+            >
+                <Text style={styles.buttonText}>Save Favorite</Text>
+            </TouchableOpacity>
+            {favoriteArtists.length > 0 && (
+                <View style={styles.favoriteArtistsContainer}>
+                    <Text style={styles.favoriteArtistsTitle}>Favorite Artists:</Text>
+                    <FlatList
+                        data={favoriteArtists}
+                        renderItem={renderItem}
+                        keyExtractor={(item) => item}
+                        style={styles.favoriteArtistsList}
+                    />
+                </View>
+            )}
         </View>
     );
 }
 
 const styles = StyleSheet.create({
-    boldText: {
-        fontWeight: "bold",
-        fontStyle: "italic",
+    container: {
+        flex: 1,
+        backgroundColor: '#fff',
+        alignItems: 'center',
+        justifyContent: 'flex-start',
+        flexDirection: 'column',
+        paddingTop: 50,
+    },
+    heading: {
+        fontWeight: 'bold',
+        fontStyle: 'italic',
         fontSize: 30,
-        margin: 60,
+        marginBottom: 100,
+        textAlign: 'center',
+        alignItems: 'flex-start',
     },
     input: {
+        width: '80%',
+        height: 40,
+        padding: 10,
         borderWidth: 1,
         borderColor: 'gray',
         borderRadius: 5,
-        padding: 10,
-        width: 200,
-        height: 40,
+        marginVertical: 10,
         fontSize: 16,
-        margin: 5,
     },
     button: {
         backgroundColor: 'blue',
-        borderRadius: 100,
-        width: 80,
-        height: 80,
+        width: '50%',
+        height: 50,
+        borderRadius: 25,
         alignItems: 'center',
         justifyContent: 'center',
-        margin: 10,
+        marginVertical: 10,
     },
     buttonText: {
-        color: 'white',
+        color: '#fff',
         fontSize: 16,
         fontWeight: 'bold',
     },
-    searchContainer: {
-        flex: 1,
+    favoriteArtistsContainer: {
+        marginTop: 20,
+        alignSelf: 'stretch',
         alignItems: 'center',
+        justifyContent: 'flex-start',
+    },
+    favoriteArtistsTitle: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        marginTop: 30,
+    },
+    favoriteArtistsList: {
+        alignSelf: 'stretch',
+    },
+    favoriteArtistItem: {
+        paddingHorizontal: 10,
+        paddingVertical: 5,
+        borderBottomWidth: 1,
+        borderBottomColor: 'gray',
+        alignSelf: 'stretch',
         justifyContent: 'center',
     },
+    favoriteArtistText: {
+        fontSize: 16,
+    },
+
 });
+

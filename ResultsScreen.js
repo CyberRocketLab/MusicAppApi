@@ -36,7 +36,7 @@ export default function ResultsScreen({ route }) {
                         <View style={styles.albumInfoContainer}>
                             <Text style={styles.albumTitle}>{album.title}</Text>
                             <Text style={styles.albumYear}>Year: {album.date ? album.date.slice(0, 4) : 'unknown'}</Text>
-                            <Text style={styles.albumType}>Type: {album['primary-type'] || 'unknown'}</Text>
+                            <Text style={styles.albumType}>Type: {album['primary-type'] || 'Album'}</Text>
                         </View>
                     </View>
                 ))}
@@ -58,25 +58,29 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#fff',
         alignItems: 'center',
-        justifyContent: 'center',
+        justifyContent: 'flex-start',
+        paddingTop: 20,
     },
     albumsContainer: {
         flexGrow: 1,
         alignItems: 'center',
         justifyContent: 'center',
+        paddingHorizontal: 10,
+        display: 'flex',
     },
     albumPairContainer: {
         flexDirection: 'row',
         justifyContent: 'space-around',
         width: '100%',
+        marginBottom: 20,
     },
     albumContainer: {
         backgroundColor: '#fff',
-        marginVertical: 10,
+        marginHorizontal: 5,
         borderRadius: 10,
         overflow: 'hidden',
-        width: '45%',
-        height: 250,
+        width: '47%',
+        height: 280,
         shadowColor: '#000',
         shadowOffset: {
             width: 0,
@@ -115,7 +119,8 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: 'bold',
         marginBottom: 5,
-    }, albumYear: {
+    },
+    albumYear: {
         fontSize: 14,
         marginBottom: 5,
     },
