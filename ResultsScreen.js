@@ -1,0 +1,126 @@
+import { StyleSheet, Text, View, ScrollView, Image } from 'react-native';
+
+export default function ResultsScreen({ route }) {
+    const { albums } = route.params;
+
+    if (!albums) {
+        return null;
+    }
+
+    const renderAlbums = () => {
+        const albumPairs = [];
+        for (let i = 0; i < albums.length; i += 2) {
+            const albumPair = [albums[i]];
+            if (i + 1 < albums.length) {
+                albumPair.push(albums[i + 1]);
+            }
+            albumPairs.push(albumPair);
+        }
+
+        return albumPairs.map((albumPair, index) => (
+            <View key={index} style={styles.albumPairContainer}>
+                {albumPair.map((album, index) => (
+                    <View key={index} style={styles.albumContainer}>
+                        <View style={styles.albumImageContainer}>
+                            {album['cover-art-archive'] && album['cover-art-archive'].front ? (
+                                <Image
+                                    source={{ uri: `https://coverartarchive.org/release/${album.id}/front` }}
+                                    style={styles.albumImage}
+                                />
+                            ) : (
+                                <View style={styles.albumImagePlaceholder}>
+                                    <Text style={styles.albumImageText}>No image available</Text>
+                                </View>
+                            )}
+                        </View>
+                        <View style={styles.albumInfoContainer}>
+                            <Text style={styles.albumTitle}>{album.title}</Text>
+                            <Text style={styles.albumYear}>Year: {album.date ? album.date.slice(0, 4) : 'unknown'}</Text>
+                            <Text style={styles.albumType}>Type: {album['primary-type'] || 'unknown'}</Text>
+                        </View>
+                    </View>
+                ))}
+            </View>
+        ));
+    };
+
+    return (
+        <View style={styles.container}>
+            <ScrollView contentContainerStyle={styles.albumsContainer} horizontal={false}>
+                {renderAlbums()}
+            </ScrollView>
+        </View>
+    );
+}
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: '#fff',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    albumsContainer: {
+        flexGrow: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    albumPairContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        width: '100%',
+    },
+    albumContainer: {
+        backgroundColor: '#fff',
+        marginVertical: 10,
+        borderRadius: 10,
+        overflow: 'hidden',
+        width: '45%',
+        height: 250,
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
+    },
+    albumImageContainer: {
+        flex: 2,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    albumImage: {
+        width: '100%',
+        height: '100%',
+        resizeMode: 'cover',
+    },
+    albumImagePlaceholder: {
+        width: '100%',
+        height: '100%',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#eee',
+    },
+    albumImageText: {
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+    albumInfoContainer: {
+        flex: 1,
+        padding: 10,
+    },
+    albumTitle: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        marginBottom: 5,
+    }, albumYear: {
+        fontSize: 14,
+        marginBottom: 5,
+    },
+    albumType: {
+        fontSize: 14,
+        marginBottom: 5,
+    },
+});
