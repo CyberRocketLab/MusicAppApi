@@ -66,7 +66,7 @@ export default function App() {
   return (
     <View style={styles.author}>
       <Text style={styles.boldText}>
-        <Text>Alexandr Curanov{'\n'}</Text>
+        <Text>Hello World!{'\n'}</Text>
         <Text>12029720</Text>
       </Text>
 
