@@ -1,3 +1,5 @@
+# Alexandr Curanov (12029720)
+
 # Music App
 
 This is a Music App that allows users to search for artists, display their releases, and save their favorite artists. 
