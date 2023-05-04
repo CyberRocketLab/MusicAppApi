@@ -9,7 +9,10 @@ export default function SearchScreen() {
 
     const handleSubmit = async () => {
         try {
+            // Encoding the URL
             const query = encodeURIComponent(searchQuery);
+
+            // Fetch artist from API
             const response = await fetch(`https://musicbrainz.org/ws/2/artist/?query=${query}&fmt=json&limit=1`, {
                 headers: { 'User-Agent': 'MyApp/1.0.0 (alexandr@gmail.com)' },
             });
@@ -19,6 +22,7 @@ export default function SearchScreen() {
             const data = await response.json();
             const artistId = data.artists[0]?.id;
 
+            // Fetching release from API
             if (artistId) {
                 const releaseResponse = await fetch(`https://musicbrainz.org/ws/2/release?artist=${artistId}&fmt=json&limit=100`, {
                     headers: { 'User-Agent': 'MyApp/1.0.0 (alexandr@gmail.com)' },
@@ -29,6 +33,7 @@ export default function SearchScreen() {
                 const releaseData = await releaseResponse.json();
                 const releases = releaseData.releases || [];
 
+                // Sending to Result screen
                 navigation.navigate('Results', { albums: releases });
             } else {
                 console.log('No artist found');
@@ -38,9 +43,13 @@ export default function SearchScreen() {
         }
     };
 
+    // Saving favourite artists to the list
     const handleSaveFavorite = () => {
         if (!favoriteArtists.includes(searchQuery)) {
+
+            //Encoding the URL
             const query = encodeURIComponent(searchQuery);
+
             fetch(`https://musicbrainz.org/ws/2/artist/?query=${query}&fmt=json&limit=1`, {
                 headers: { 'User-Agent': 'MyApp/1.0.0 (alexandr@gmail.com)' },
             })
@@ -63,6 +72,7 @@ export default function SearchScreen() {
         }
     };
 
+    // Selecting artist from favourite list and searching
     const handleFavoritePress = (artist) => {
         setSearchQuery(artist);
         handleSubmit();

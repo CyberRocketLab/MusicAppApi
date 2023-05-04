@@ -21,10 +21,23 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.rocket2033.MusicA2App"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "privacy": "public",
+    "extra": {
+      "eas": {
+        "projectId": "ba1a5bb7-fcbb-4bff-bf99-9dac854d101d"
+      }
+    },
+    "runtimeVersion": {
+      "policy": "sdkVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/ba1a5bb7-fcbb-4bff-bf99-9dac854d101d"
     }
   }
 }
